@@ -1,0 +1,90 @@
+<div class="container py-4 position-relative">
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner-border text-secondary" role="status" aria-label="Loading"></div>
+  </div>
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <h2 class="mb-0">Photo Gallery</h2>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <div class="input-group input-group-sm" style="width: auto; min-width: 240px;">
+        <label class="input-group-text">Sort</label>
+        <select class="form-select" [(ngModel)]="sortBy" (change)="onSortChange()">
+          <option value="name">Name</option>
+          <option value="count">Count</option>
+          <option value="recent">Recent</option>
+        </select>
+        <select class="form-select" [(ngModel)]="sortDir" (change)="onSortChange()">
+          <option value="asc">Asc</option>
+          <option value="desc">Desc</option>
+        </select>
+      </div>
+      <div class="input-group input-group-sm" style="width:auto; min-width: 200px;">
+        <label class="input-group-text">Group</label>
+        <select class="form-select" [(ngModel)]="groupDepth" (change)="onGroupDepthChange()">
+          <option [ngValue]="1">Top-level</option>
+          <option [ngValue]="2">Two levels</option>
+        </select>
+      </div>
+      <button class="btn btn-sm btn-outline-secondary" (click)="expandAll()">Expand all</button>
+      <button class="btn btn-sm btn-outline-secondary" (click)="collapseAll()">Collapse all</button>
+    </div>
+  </div>
+  
+  
+  <div class="mb-3" *ngIf="auth.isAdmin">
+    <div class="row g-2 align-items-center">
+      <div class="col-auto">
+        <div class="input-group input-group-sm">
+          <label class="input-group-text">Folder</label>
+          <select class="form-select" [(ngModel)]="selectedFolder" (ngModelChange)="onSelectedFolderChange($event)">
+            <option *ngFor="let g of groups" [value]="g.name">{{ g.name }}</option>
+            <option [value]="'root'">root</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="input-group input-group-sm" style="min-width: 220px;">
+          <span class="input-group-text">New</span>
+          <input type="text" class="form-control" placeholder="type a folder" [(ngModel)]="selectedFolder" (ngModelChange)="onSelectedFolderChange($event)" />
+        </div>
+      </div>
+      <div class="col-auto">
+        <input #fileInput id="fileInput" type="file" (change)="onFileSelected($event)" [disabled]="uploading" accept="image/*" style="display:none" />
+        <button class="btn btn-sm btn-primary" (click)="openFilePicker()">Choose</button>
+      </div>
+      <div class="col-auto" *ngIf="uploading">
+        <span class="text-info">Uploading...</span>
+      </div>
+      <div class="col-12" *ngIf="error">
+        <span class="text-danger">{{ error }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="previewSrc" class="preview mt-2">
+      <div class="small text-muted mb-1">Preview</div>
+      <img [src]="previewSrc" alt="preview" style="max-height:120px; max-width:220px; object-fit:contain;" />
+    </div>
+  </div>
+  <ng-container *ngIf="groups.length; else noPhotos">
+    <div class="accordion" id="galleryAccordion">
+      <div class="accordion-item" *ngFor="let group of groups; trackBy: trackGroup">
+        <h2 class="accordion-header" [id]="'heading-' + group.name">
+          <button class="accordion-button" [class.collapsed]="!isExpanded(group.name)" type="button"
+                  (click)="toggleGroup(group.name)" [attr.aria-expanded]="isExpanded(group.name)">
+            <span class="me-2">{{ group.name }}</span>
+            <span class="text-muted small">({{ group.photos.length }})</span>
+          </button>
+        </h2>
+        <div class="accordion-collapse collapse" [class.show]="isExpanded(group.name)"
+             [id]="'collapse-' + group.name" [attr.aria-labelledby]="'heading-' + group.name"
+             data-bs-parent="#galleryAccordion">
+          <div class="accordion-body">
+            <app-gallery-section [photos]="group.photos"></app-gallery-section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #noPhotos>
+    <div class="col-12 text-muted">No photos yet.</div>
+  </ng-template>
+</div>

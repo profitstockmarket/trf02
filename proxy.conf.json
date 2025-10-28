@@ -1,0 +1,24 @@
+{
+  "/api/list-photos": {
+    "target": "https://w00lhezvrh.execute-api.us-east-2.amazonaws.com",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api/list-photos": "/list-photos"
+    },
+    "headers": {
+      "x-api-key": "trf02-key-01-photos"
+    }
+  },
+  "/api/upload-photo": {
+    "target": "https://w00lhezvrh.execute-api.us-east-2.amazonaws.com",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api/upload-photo": "/upload-photo"
+    },
+    "headers": {
+      "x-api-key": "trf02-key-01-photos"
+    }
+  }
+}

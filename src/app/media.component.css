@@ -1,0 +1,32 @@
+.gallery-img {
+  object-fit: cover;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.15s;
+  position: absolute;
+}
+.gallery-img:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.justified-gallery {
+  position: relative;
+  width: 100%;
+  min-height: 240px;
+}
+
+.preview img { border-radius: 6px; border: 1px solid rgba(0,0,0,0.06); }
+
+/* Loading overlay for initial media fetch */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  z-index: 10;
+}
+@supports not (color: color-mix(in srgb, black, white)) {
+  .loading-overlay { background: rgba(255,255,255,0.8); }
+}

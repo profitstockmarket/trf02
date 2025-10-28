@@ -1,0 +1,29 @@
+<div #galleryContainer class="justified-gallery position-relative" [style.minHeight.px]="240" [style.height.px]="layoutHeight || 240">
+  <ng-container *ngIf="photos?.length; else noPhotos">
+    <ng-container *ngIf="layoutHeight && layoutBoxes?.length === photos.length; else gridFallback">
+  <ng-container *ngFor="let photo of photos; let i = index; trackBy: trackIndex">
+        <img
+          *ngIf="isIndexVisible(i)"
+          [src]="photo.url"
+          class="gallery-img position-absolute"
+          [style.left.px]="layoutBoxes[i]?.left"
+          [style.top.px]="layoutBoxes[i]?.top"
+          [style.width.px]="layoutBoxes[i]?.width"
+          [style.height.px]="layoutBoxes[i]?.height"
+          alt="Photo"
+          loading="lazy" decoding="async" fetchpriority="low"
+        />
+      </ng-container>
+    </ng-container>
+    <ng-template #gridFallback>
+      <div class="row g-2">
+        <div class="col-6 col-md-4" *ngFor="let _ of photos | slice:0:6">
+          <div class="skeleton-tile rounded"></div>
+        </div>
+      </div>
+    </ng-template>
+  </ng-container>
+  <ng-template #noPhotos>
+    <div class="col-12 text-muted">No photos yet.</div>
+  </ng-template>
+</div>

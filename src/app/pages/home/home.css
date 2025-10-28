@@ -1,0 +1,83 @@
+.card-plain { background: transparent; border: 0; }
+.placeholder-tile { background: #f4f6f8; border: 1px solid #edf0f2; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02); }
+.placeholder-banner { background: #f4f6f8; border: 1px solid #edf0f2; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.02); }
+.stretched-link { text-decoration: none; position: relative; }
+.stretched-link::after { content: ''; position: absolute; inset: 0; }
+.hero .display-4 { letter-spacing: -0.02em; }
+.hero .btn { border-radius: 999px; padding-left: 1.25rem; padding-right: 1.25rem; }
+.latest-strip img { width: 96px; height: 96px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); }
+.thumb-link { display: inline-block; flex: 0 0 auto; }
+/* Page background wrapper for the homepage */
+.home-surface {
+	background-color: var(--fusion-link-water);
+	background-image:
+		radial-gradient(1000px 300px at 100% 0%, color-mix(in srgb, var(--fusion-viking) 28%, transparent), transparent 60%),
+		linear-gradient(var(--fusion-gradient-angle),
+			color-mix(in srgb, var(--fusion-link-water) 92%, var(--fusion-white)) 0%,
+			color-mix(in srgb, var(--fusion-light-wisteria) 75%, transparent) 52%,
+			color-mix(in srgb, var(--fusion-viking) 65%, transparent) 100%
+		);
+	min-height: 100vh;
+}
+.theme-dark .home-surface {
+	background-color: #0c0f14;
+	background-image:
+		radial-gradient(1000px 300px at 100% 0%, color-mix(in srgb, var(--fusion-viking) 10%, transparent), transparent 60%),
+		linear-gradient(var(--fusion-gradient-angle),
+			color-mix(in srgb, var(--fusion-black) 92%, var(--fusion-light-wisteria) 8%) 0%,
+			color-mix(in srgb, var(--fusion-black) 90%, var(--fusion-link-water) 10%) 100%
+		);
+}
+/* scroll snap for a nicer horizontal scroll feel */
+.latest-strip { scroll-snap-type: x mandatory; }
+.thumb-link { scroll-snap-align: start; }
+
+/* Hero section */
+
+.hero {
+		position: relative;
+		min-height: 60vh;
+		background: transparent; /* remove background image; image will be inline */
+}
+
+/* Paragraph sizing now managed by grid/cols */
+.hero h1 { font-size: clamp(2rem, 4vw + 0.5rem, 3.25rem); line-height: 1.1; }
+.hero p.lead { font-size: clamp(1rem, 1.1vw + 0.8rem, 1.25rem); }
+/* Overlay no longer needed since we’re using a light theme only */
+.hero > .container {
+	position: relative;
+	z-index: 1;
+}
+
+/* Responsive tweaks */
+@media (max-width: 576px) {
+	.hero { min-height: 50vh; }
+	.hero .btn { width: 100%; }
+	.latest-strip img, .skeleton-thumb { width: 72px; height: 72px; }
+}
+
+@media (min-width: 1200px) {
+	.hero { min-height: 70vh; }
+}
+
+	/* Skeletons for latest media */
+	.skeleton { position: relative; overflow: hidden; background: #eef2f6; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); flex: 0 0 auto; }
+	.theme-dark .skeleton { background: #161a22; border-color: rgba(255,255,255,0.08); }
+	.skeleton::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+		transform: translateX(-100%);
+		animation: shimmer 1.2s infinite;
+	}
+	@keyframes shimmer { 100% { transform: translateX(100%); } }
+	.skeleton-thumb { width: 96px; height: 96px; }
+
+/* Inline hero illustration (desktop only) */
+.hero-illustration {
+	max-height: 520px;
+	width: 100%;
+	height: auto;
+	object-fit: contain;
+}
