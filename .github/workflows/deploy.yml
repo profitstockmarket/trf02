@@ -19,6 +19,11 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      # Fallback so the action doesn't fail hard if the repo var is missing
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-2' }}
+      S3_BUCKET: ${{ vars.S3_BUCKET || '' }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,26 +44,46 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload static assets to S3 (immutable)
         run: |
           ASSETS_DIR="dist/trf02/browser"
-          aws s3 sync "$ASSETS_DIR" "s3://${{ vars.S3_BUCKET }}/" \
+          echo "Using AWS region: $AWS_REGION"
+          echo "Uploading to bucket: $S3_BUCKET"
+          echo "Listing build output:"
+          ls -la "$ASSETS_DIR" || true
+          aws s3 sync "$ASSETS_DIR" "s3://$S3_BUCKET/" \
             --delete \
             --exclude "index.html" \
             --cache-control "public,max-age=31536000,immutable"
 
       - name: Upload index.html to S3 (short cache)
         run: |
+          set -euo pipefail
           INDEX_FILE="dist/trf02/browser/index.html"
-          aws s3 cp "$INDEX_FILE" "s3://${{ vars.S3_BUCKET }}/index.html" \
+          echo "Attempting aws s3 cp of $INDEX_FILE to s3://$S3_BUCKET/index.html"
+          if [ ! -f "$INDEX_FILE" ]; then
+            echo "index.html not found at $INDEX_FILE. Searching..." >&2
+            find dist -maxdepth 4 -type f -name 'index.html' -print || true
+          fi
+          # First try via s3 cp
+          if ! aws s3 cp "$INDEX_FILE" "s3://$S3_BUCKET/index.html" \
             --cache-control "public,max-age=60" \
-            --content-type "text/html; charset=utf-8"
+            --content-type "text/html; charset=utf-8"; then
+            echo "aws s3 cp failed; retrying with s3api put-object (adding SSE)" >&2
+            aws s3api put-object \
+              --bucket "$S3_BUCKET" \
+              --key "index.html" \
+              --body "$INDEX_FILE" \
+              --cache-control "public,max-age=60" \
+              --content-type "text/html; charset=utf-8" \
+              --server-side-encryption AES256
+          fi
 
       - name: Invalidate CloudFront cache
-        if: vars.CLOUDFRONT_DISTRIBUTION_ID != ''
+        if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
             --paths "/*"
