@@ -76,8 +76,22 @@
 
 /* Inline hero illustration (desktop only) */
 .hero-illustration {
-	max-height: 520px;
+	max-height: 680px;
 	width: 100%;
 	height: auto;
 	object-fit: contain;
+}
+@media (min-width: 1400px) {
+  .hero-illustration { max-height: 780px; }
+}
+
+/* Eyebrow pill above the hero title */
+.eyebrow {
+	background: rgba(0,0,0,0.06);
+	border: 1px solid rgba(0,0,0,0.08);
+	backdrop-filter: saturate(120%) blur(2px);
+}
+.theme-dark .eyebrow {
+	background: rgba(255,255,255,0.06);
+	border-color: rgba(255,255,255,0.12);
 }
