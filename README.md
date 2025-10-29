@@ -57,3 +57,11 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## CI/CD behavior
+
+- Pushes to `main` build and deploy the SPA to S3. If `CLOUDFRONT_DISTRIBUTION_ID` is configured, the workflow invalidates CloudFront on success.
+- Pull requests build for verification but skip AWS credential configuration, S3 upload, and CloudFront invalidation.
+- CloudFront invalidation is also skipped automatically if the distribution ID is not set or if permissions are missing (the job logs a notice and continues).
+
+See `DEPLOY-AWS.md` for end-to-end AWS setup and troubleshooting.
