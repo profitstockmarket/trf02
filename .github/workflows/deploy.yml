@@ -61,12 +61,40 @@ jobs:
       - name: Upload index.html to S3 (short cache)
         run: |
           set -euo pipefail
-          INDEX_FILE="dist/trf02/browser/index.html"
-          echo "Attempting aws s3 cp of $INDEX_FILE to s3://$S3_BUCKET/index.html"
+          ASSETS_DIR="dist/trf02/browser"
+          INDEX_FILE="$ASSETS_DIR/index.html"
+          echo "Attempting upload from: $INDEX_FILE"
           if [ ! -f "$INDEX_FILE" ]; then
-            echo "index.html not found at $INDEX_FILE. Searching..." >&2
-            find dist -maxdepth 4 -type f -name 'index.html' -print || true
+            echo "index.html not found at $INDEX_FILE. Searching for alternatives..." >&2
+            echo "Listing HTML files under $ASSETS_DIR:" >&2
+            find "$ASSETS_DIR" -maxdepth 1 -type f -name '*.html' -print || true
+            # Known Angular SSR variants
+            for candidate in \
+              "$ASSETS_DIR/index.csr.html" \
+              "$ASSETS_DIR/index.client.html" \
+              "$ASSETS_DIR/index.browser.html"; do
+              if [ -f "$candidate" ]; then
+                echo "Using fallback candidate: $candidate" >&2
+                INDEX_FILE="$candidate"
+                break
+              fi
+            done
+            if [ ! -f "$INDEX_FILE" ]; then
+              # Pick first html file in the assets dir if available
+              CANDIDATE=$(find "$ASSETS_DIR" -maxdepth 1 -type f -name '*.html' | head -n 1 || true)
+              if [ -n "${CANDIDATE:-}" ] && [ -f "$CANDIDATE" ]; then
+                echo "Using discovered HTML file: $CANDIDATE" >&2
+                INDEX_FILE="$CANDIDATE"
+              fi
+            fi
           fi
+          if [ ! -f "$INDEX_FILE" ]; then
+            echo "No index-like HTML file found in $ASSETS_DIR. Build output layout may differ." >&2
+            echo "Full dist listing for diagnostics:" >&2
+            find dist -maxdepth 4 -type f -print | sed 's/^/  /'
+            exit 1
+          fi
+          echo "Final source file: $INDEX_FILE"
           # First try via s3 cp
           if ! aws s3 cp "$INDEX_FILE" "s3://$S3_BUCKET/index.html" \
             --cache-control "public,max-age=60" \
