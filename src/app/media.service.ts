@@ -31,8 +31,8 @@ export class MediaService {
           this.uploadUrl = '/api/upload-photo';
         }
       } catch {}
-      // runtime debug
-      console.log('MediaService config:', { listUrl: this.listUrl, uploadUrl: this.uploadUrl, apiKey: this.apiKey });
+  // runtime debug (avoid logging API keys)
+  console.log('MediaService config:', { listUrl: this.listUrl, uploadUrl: this.uploadUrl });
     } else {
       // On server we can still set from process.env if desired in future.
       this.cfg = {};
